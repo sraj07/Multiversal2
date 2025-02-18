@@ -25,8 +25,8 @@ void on_center_button() {
 //LADY BROWN = 1
 //LADY BROWN ROT. SENSOR = 11
 //MOGO MECH = H
-pros::MotorGroup left_motors({5, 2, 20});  // left motor ports
-pros::MotorGroup right_motors({-10, -9, -3}); // right motor ports
+pros::MotorGroup left_motors({-5, 2, 20});  // left motor ports (stacked 20)
+pros::MotorGroup right_motors({-10, 9, 3}); // right motor ports (stacked 3)
 pros::Imu imu(10);                              // imu port
 
 // tracking wheels
@@ -166,6 +166,7 @@ void opcontrol() {
 	pros::MotorGroup left_mg({5, 2, 20});    // Creates a motor group with forwards ports 1 & 3 and reversed port 2
 	pros::MotorGroup right_mg({-10, -9, -3});  // Creates a motor group with forwards port 5 and reversed ports 4 & 6
 
+	pros::Motor intake (12);
 
 	while (true) {
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
@@ -180,5 +181,8 @@ void opcontrol() {
 		pros::delay(20);                          // Run for 20 ms then update
 
 		//insert intake code
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
+			intake.move(127);
+
 	}
 }
