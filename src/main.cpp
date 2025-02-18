@@ -145,37 +145,7 @@ void competition_initialize()
  */
 void autonomous()
 {
-	chassis.moveTo(0, 0, 5000);
-	chassis.moveTo(-16.728, 12.578, 5000);
-	chassis.moveTo(-47.849, 13.486, 5000);
-	chassis.moveTo(-47.849, 36.568, 5000);
-	chassis.moveTo(-23.86, 37.087, 5000);
-	chassis.moveTo(-47.72, 83.639, 5000);
-	chassis.moveTo(-25.027, 82.861, 5000);
-	chassis.moveTo(-47.59, 108.407, 5000);
-	chassis.moveTo(-39.291, 23.082, 5000);
-	chassis.moveTo(-62.503, -2.723, 5000);
-	chassis.moveTo(-59.261, 13.875, 5000);
-	chassis.moveTo(-59.261, 60.039, 5000);
-	chassis.moveTo(-51.221, -1.815, 5000);
-	chassis.moveTo(15.042, 13.745, 5000);
-	chassis.moveTo(45.645, 0.519, 5000);
-	chassis.moveTo(46.942, 12.319, 5000);
-	chassis.moveTo(55.63, 12.189, 5000);
-	chassis.moveTo(64.188, -3.242, 5000);
-	chassis.moveTo(57.834, 60.428, 5000);
-	chassis.moveTo(22.952, 83.899, 5000);
-	chassis.moveTo(1.037, 103.09, 5000);
-	chassis.moveTo(-16.079, 88.826, 5000);
-	chassis.moveTo(-1.426, 59.52, 5000);
-	chassis.moveTo(23.082, 36.309, 5000);
-	chassis.moveTo(47.59, 37.216, 5000);
-	chassis.moveTo(46.942, 86.103, 5000);
-	chassis.moveTo(46.942, 106.462, 5000);
-	chassis.moveTo(61.984, 123.19, 5000);
-	chassis.moveTo(60.039, -4.928, 5000);
-	chassis.moveTo(-24.379, 111.908, 5000);
-	chassis.moveTo(-68.078, 125.913, 5000);
+	chassis.moveToPoint(0, 0, 5000);
 }
 
 /**

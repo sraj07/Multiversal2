@@ -277,14 +277,14 @@ struct SwingToHeadingParams {
 };
 
 /**
- * @brief Parameters for Chassis::moveToPosePointPosePose
+ * @brief Parameters for Chassis::moveToPose
  *
- * We use a struct to simplify customization. Chassis::moveToPosePointPosePose has many
+ * We use a struct to simplify customization. Chassis::moveToPose has many
  * parameters and specifying them all just to set one optional param ruins
  * readability. By passing a struct to the function, we can have named
  * parameters, overcoming the c/c++ limitation
  */
-struct moveToPosePointPosePoseParams {
+struct MoveToPoseParams {
         /** whether the robot should move forwards or backwards. True by default */
         bool forwards = true;
         /** how fast the robot will move around corners. Recommended value 2-15. 0 means use horizontalDrift set in
@@ -303,14 +303,14 @@ struct moveToPosePointPosePoseParams {
 };
 
 /**
- * @brief Parameters for Chassis::moveToPosePointPosePoint
+ * @brief Parameters for Chassis::moveToPoint
  *
- * We use a struct to simplify customization. Chassis::moveToPosePointPosePoint has many
+ * We use a struct to simplify customization. Chassis::moveToPoint has many
  * parameters and specifying them all just to set one optional param harms
  * readability. By passing a struct to the function, we can have named
  * parameters, overcoming the c/c++ limitation
  */
-struct moveToPosePointPosePointParams {
+struct MoveToPointParams {
         /** whether the robot should move forwards or backwards. True by default */
         bool forwards = true;
         /** the maximum speed the robot can travel at. Value between 0-127. 127 by default */
@@ -430,14 +430,14 @@ class Chassis {
         /**
          * @brief Wait until the robot has traveled a certain distance along the path
          *
-         * @note Units are in inches if current motion is moveToPosePointPosePoint, moveToPosePointPosePose or follow, degrees for everything else
+         * @note Units are in inches if current motion is moveToPoint, moveToPose or follow, degrees for everything else
          *
          * @param dist the distance the robot needs to travel before returning
          *
          * @b Example
          * @code {.cpp}
          * // move the robot to x = 20, y = 15, and face heading 90
-         * chassis.moveToPosePointPosePose(20, 15, 90, 4000);
+         * chassis.moveToPose(20, 15, 90, 4000);
          * // wait until the robot has traveled 10 inches
          * chassis.waitUntil(10);
          * // output "traveled 10 inches" to the console
@@ -458,7 +458,7 @@ class Chassis {
          * @b Example
          * @code {.cpp}
          * // move the robot to x = 20, y = 15, and face heading 90
-         * chassis.moveToPosePointPosePose(20, 15, 90, 4000);
+         * chassis.moveToPose(20, 15, 90, 4000);
          * // wait until the robot has completed the motion
          * chassis.waitUntilDone();
          * // output "motion completed" to the console
@@ -633,25 +633,25 @@ class Chassis {
          * @b Example
          * @code {.cpp}
          * // move the robot to x = 20, y = 15, and face heading 90 with a timeout of 4000ms
-         * chassis.moveToPosePointPosePose(20, 15, 90, 4000);
+         * chassis.moveToPose(20, 15, 90, 4000);
          * // move the robot to x = 20, y = 15, and face heading 90 with a timeout of 4000ms
          * // but face the point with the back of the robot
-         * chassis.moveToPosePointPosePose(20, 15, 90, 4000, {.forwards = false});
+         * chassis.moveToPose(20, 15, 90, 4000, {.forwards = false});
          * // move the robot to x = -20, 32.5 and face heading 90 with a timeout of 4000ms
          * // with a maxSpeed of 60
-         * chassis.moveToPosePointPosePose(-20, 32.5, 90, 4000, {.maxSpeed = 60});
+         * chassis.moveToPose(-20, 32.5, 90, 4000, {.maxSpeed = 60});
          * // move the robot to x = 10, y = 10 and face heading 90
          * // with a minSpeed of 20 and a maxSpeed of 60
-         * chassis.moveToPosePointPosePose(10, 10, 90, 4000, {.maxSpeed = 60, .minSpeed = 20});
+         * chassis.moveToPose(10, 10, 90, 4000, {.maxSpeed = 60, .minSpeed = 20});
          * // move the robot to x = 7.5, y = 7.5 and face heading 90 with a timeout of 4000ms
          * // with a minSpeed of 60, and exit the movement if the robot is within 5 inches of the target
-         * chassis.moveToPosePointPosePose(7.5, 7.5, 90, 4000, {.minSpeed = 60, .earlyExitRange = 5});
+         * chassis.moveToPose(7.5, 7.5, 90, 4000, {.minSpeed = 60, .earlyExitRange = 5});
          * // move the robot to 0, 0, and facing heading 0 with a timeout of 4000ms
          * // this motion should not be as curved as the others, so we set lead to a smaller value (0.3)
-         * chassis.moveToPosePointPosePose(0, 0, 0, 4000, {.lead = 0.3});
+         * chassis.moveToPose(0, 0, 0, 4000, {.lead = 0.3});
          * @endcode
          */
-        void moveToPosePointPosePose(float x, float y, float theta, int timeout, moveToPosePointPosePoseParams params = {}, bool async = true);
+        void moveToPose(float x, float y, float theta, int timeout, MoveToPoseParams params = {}, bool async = true);
         /**
          * @brief Move the chassis towards a target point
          *
@@ -664,22 +664,22 @@ class Chassis {
          * @b Example
          * @code {.cpp}
          * // move the robot to x = 20, y = 15 with a timeout of 4000ms
-         * chassis.moveToPosePointPosePoint(20, 15, 4000);
+         * chassis.moveToPoint(20, 15, 4000);
          * // move the robot to x = 20, y = 15 with a timeout of 4000ms
          * // but face the point with the back of the robot
-         * chassis.moveToPosePointPosePoint(20, 15, 4000, {.forwards = false});
+         * chassis.moveToPoint(20, 15, 4000, {.forwards = false});
          * // move the robot to x = -20, 32.5 with a timeout of 4000ms
          * // with a maxSpeed of 60
-         * chassis.moveToPosePointPosePoint(-20, 32.5, 4000, {.maxSpeed = 60});
+         * chassis.moveToPoint(-20, 32.5, 4000, {.maxSpeed = 60});
          * // move the robot to x = 10, y = 10 with a timeout of 4000ms
          * // with a minSpeed of 20 and a maxSpeed of 60
-         * chassis.moveToPosePointPosePoint(10, 10, 4000, {.maxSpeed = 60, .minSpeed = 20});
+         * chassis.moveToPoint(10, 10, 4000, {.maxSpeed = 60, .minSpeed = 20});
          * // move the robot to x = 7.5, y = 7.5 with a timeout of 4000ms
          * // with a minSpeed of 60, and exit the movement if the robot is within 5 inches of the target
-         * chassis.moveToPosePointPosePoint(7.5, 7.5, 4000, {.minSpeed = 60, .earlyExitRange = 5});
+         * chassis.moveToPoint(7.5, 7.5, 4000, {.minSpeed = 60, .earlyExitRange = 5});
          * @endcode
          */
-        void moveToPosePointPosePoint(float x, float y, int timeout, moveToPosePointPosePointParams params = {}, bool async = true);
+        void moveToPoint(float x, float y, int timeout, MoveToPointParams params = {}, bool async = true);
         /**
          * @brief Move the chassis along a path
          *
@@ -811,7 +811,7 @@ class Chassis {
          * @b Example
          * @code {.cpp}
          * // move the robot to x = 20, y = 20 with a timeout of 4000ms
-         * chassis.moveToPosePointPosePoint(20, 20, 4000);
+         * chassis.moveToPoint(20, 20, 4000);
          * // wait 500 milliseconds
          * pros::delay(500);
          * // cancel the current motion. This stops it immediately
@@ -822,7 +822,7 @@ class Chassis {
          * // this example shows how the cancelMotion function behaves when a motion is queued
          * // this is an advanced example since we will be using tasks here
          * // move the robot to x = 20, y = 20 with a timeout of 4000ms
-         * chassis.moveToPosePointPosePoint(20, 20, 4000);
+         * chassis.moveToPoint(20, 20, 4000);
          * // start a lambda task that will be used to cancel the motion after 500ms
          * pros::Task task([] {
          *     // wait 500 milliseconds
@@ -832,7 +832,7 @@ class Chassis {
          * });
          * // queue a motion to x = 10, y = 10 with a timeout of 4000ms
          * // this will run after the first motion is cancelled
-         * chassis.moveToPosePointPosePoint(10, 10, 4000);
+         * chassis.moveToPoint(10, 10, 4000);
          * @endcode
          */
         void cancelMotion();
@@ -843,7 +843,7 @@ class Chassis {
          * @b Example
          * @code {.cpp}
          * // move the robot to x = 20, y = 20 with a timeout of 4000ms
-         * chassis.moveToPosePointPosePoint(20, 20, 4000);
+         * chassis.moveToPoint(20, 20, 4000);
          * // wait 500 milliseconds
          * pros::delay(500);
          * // cancel all motions. The robot will stop immediately
@@ -854,7 +854,7 @@ class Chassis {
          * // this example shows how the cancelMotion function behaves when a motion is queued
          * // this is an advanced example since we will be using tasks here
          * // move the robot to x = 20, y = 20 with a timeout of 4000ms
-         * chassis.moveToPosePointPosePoint(20, 20, 4000);
+         * chassis.moveToPoint(20, 20, 4000);
          * // start a lambda task that will be used to cancel all motions after 500ms
          * pros::Task task([] {
          *     // wait 500 milliseconds
@@ -864,7 +864,7 @@ class Chassis {
          * });
          * // queue a motion to x = 10, y = 10 with a timeout of 4000ms
          * // this will never run because cancelAllMotions will be called while this motion is in the queue
-         * chassis.moveToPosePointPosePoint(10, 10, 4000);
+         * chassis.moveToPoint(10, 10, 4000);
          * @endcode
          */
         void cancelAllMotions();
@@ -874,7 +874,7 @@ class Chassis {
          * @b Example
          * @code {.cpp}
          * // move the robot to x = 20, y = 15, and face heading 90
-         * chassis.moveToPosePointPosePose(20, 15, 90, 4000);
+         * chassis.moveToPose(20, 15, 90, 4000);
          * // delay for 500ms
          * // this returns true, since the robot is still in motion
          * chassis.isInMotion();
