@@ -1,7 +1,9 @@
 #include "main.h"
-#include "lemlib/api.hpp" //IWYU pragma: keep
+//#include "lemlib/api.hpp" //IWYU pragma: keep
 #include "lemlib/chassis/chassis.hpp"
 #include "lemlib/chassis/trackingWheel.hpp"
+#include "pros/adi.h"
+#include "pros/adi.hpp"
 #include "pros/misc.h"
 #include "pros/motors.hpp"
 
@@ -25,9 +27,9 @@ void on_center_button() {
 //LADY BROWN = 1
 //LADY BROWN ROT. SENSOR = 11
 //MOGO MECH = H
-pros::MotorGroup left_motors({-5, 2, 20});  // left motor ports (stacked 20)
-pros::MotorGroup right_motors({-10, 9, 3}); // right motor ports (stacked 3)
-pros::Imu imu(10);                              // imu port
+pros::MotorGroup left_motors({-5, -2, 20});  // left motor ports (stacked 20)
+pros::MotorGroup right_motors({-10, -3, 9}); // right motor ports (stacked 3)
+pros::Imu imu(10);                                // imu port
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
@@ -36,10 +38,10 @@ pros::Rotation horizontalEnc(19);
 pros::Rotation verticalEnc0(6);
 pros::Rotation verticalEnc1(7);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::OLD_325, -5.75);
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::OLD_325, 0.5);
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
-lemlib::TrackingWheel vertical0(&verticalEnc0, lemlib::Omniwheel::OLD_325, -2.5);
-lemlib::TrackingWheel vertical1(&verticalEnc0, lemlib::Omniwheel::OLD_325, -2.5);
+lemlib::TrackingWheel vertical0(&verticalEnc0, lemlib::Omniwheel::OLD_325, 3);
+lemlib::TrackingWheel vertical1(&verticalEnc0, lemlib::Omniwheel::OLD_325, 3);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&left_motors, // left motor group
@@ -163,27 +165,45 @@ void autonomous()
  */
 void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::MotorGroup left_mg({5, 2, 20});    // Creates a motor group with forwards ports 1 & 3 and reversed port 2
-	pros::MotorGroup right_mg({-10, -9, -3});  // Creates a motor group with forwards port 5 and reversed ports 4 & 6
+	pros::MotorGroup left_mg({-4, -2, 20});    // Creates a motor group with forwards ports 1 & 3 and reversed port 2
+	pros::MotorGroup right_mg({-10, -3, 9});  // Creates a motor group with forwards port 5 and reversed ports 4 & 6
 
-	pros::Motor intake (12);
+	pros::Motor intake (-12);
+	pros::Motor ladybrown(1);
+
+	bool state1 = LOW;
+	pros::adi::DigitalOut mogomech ('H', state1);
+	bool mgm = false;
 
 	while (true) {
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 							(pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 		                	(pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);  // Prints status of the emulated screen LCDs
 
-		// Arcade control scheme
+		//Arcade control scheme
 		int dir = master.get_analog(ANALOG_LEFT_Y);    // Gets amount forward/backward from left joystick
 		int turn = master.get_analog(ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
 		left_mg.move(dir - turn);                      // Sets left motor voltage
 		right_mg.move(dir + turn);                     // Sets right motor voltage
 		pros::delay(20);                          // Run for 20 ms then update
 
-		//insert intake code
+		//Intake
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
 			intake.move(127);
+		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
+			intake.move(-127);
 		else
-			intake.brake();
+			intake.move(0);
+
+		//MGM
+		if(master.get_digital_new_press(DIGITAL_UP)){
+			mgm = ! mgm;
+			}
+			if(mgm){
+			mogomech.set_value(true);
+			}        
+			else{
+			mogomech.set_value(false);
+			}
 	}
 }
