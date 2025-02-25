@@ -6,6 +6,11 @@
 #include "pros/adi.hpp"
 #include "pros/misc.h"
 #include "pros/motors.hpp"
+#include "pros/rotation.hpp"
+#include "pros/screen.h"
+#include "pros/screen.hpp"
+#include <iostream>
+#include <string>
 
 /**
  * A callback function for LLEMU's center button.
@@ -165,15 +170,27 @@ void autonomous()
  */
 void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
+
+	//DRIVETRAIN
 	pros::MotorGroup left_mg({-4, -2, 20});    // Creates a motor group with forwards ports 1 & 3 and reversed port 2
 	pros::MotorGroup right_mg({10, -3, 9});  // Creates a motor group with forwards port 5 and reversed ports 4 & 6
 
+	//MOTORS
 	pros::Motor intake (-12);
 	pros::Motor ladybrown(1);
 
+	//SENSORS
+	pros::Rotation lbrs (11); //lady brown rotation sensor (lbrs)
+	lbrs.reset();
+
+	//PNEU
 	bool state1 = LOW;
 	pros::adi::DigitalOut mogomech ('H', state1);
+
+	//VARS
 	bool mgm = false;
+	const int INTAKE_SPEED = 103;
+	const int LB_SPEED = 45;
 
 	while (true) {
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
@@ -189,21 +206,30 @@ void opcontrol() {
 
 		//Intake
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
-			intake.move(127);
+			intake.move(INTAKE_SPEED);
 		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-			intake.move(-127);
+			intake.move(-INTAKE_SPEED);
 		else
 			intake.move(0);
 
 		//MGM
-		if(master.get_digital_new_press(DIGITAL_UP)){
+		if (master.get_digital_new_press(DIGITAL_UP))
 			mgm = ! mgm;
-			}
-			if(mgm){
+		if(mgm)
 			mogomech.set_value(true);
-			}        
-			else{
+		else
 			mogomech.set_value(false);
-			}
+
+		//LADY DIDDY
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X))
+		{
+			ladybrown.move(LB_SPEED);
+			std::cout << lbrs.get_angle();
+			std::cout << lbrs.get_position();
+		}
+		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_A))
+			ladybrown.move(-LB_SPEED);
+		else
+			ladybrown.move(0);
 	}
 }
