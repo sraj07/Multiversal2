@@ -187,15 +187,28 @@ void opcontrol() {
 	bool state1 = LOW;
 	pros::adi::DigitalOut mogomech ('H', state1);
 
-	//VARS
+	//STARTING STATES
 	bool mgm = false;
 	const int INTAKE_SPEED = 103;
-	const int LB_SPEED = 45;
+	const int LB_SPEED = 85;
+
+	bool sendBack = false;
 
 	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-							(pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                	(pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);  // Prints status of the emulated screen LCDs
+		//Prints status of the emulated screen LCDs
+		pros::lcd::print(
+			0, "%d %d %d",
+			(pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
+			(pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
+			(pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0
+		);
+
+		//Prints lady brown rotation sensor position
+		pros::screen::print(
+			pros::E_TEXT_LARGE_CENTER,
+			1,
+			std::to_string(lbrs.get_position()).c_str()
+		);
 
 		//Arcade control scheme
 		int dir = master.get_analog(ANALOG_LEFT_Y);    // Gets amount forward/backward from left joystick
@@ -208,7 +221,7 @@ void opcontrol() {
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
 			intake.move(INTAKE_SPEED);
 		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-			intake.move(-INTAKE_SPEED);
+			intake.move(-INTAKE_SPEED/2);
 		else
 			intake.move(0);
 
@@ -221,15 +234,25 @@ void opcontrol() {
 			mogomech.set_value(false);
 
 		//LADY DIDDY
-		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X))
+		//22460
+
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X) && lbrs.get_position() > 22460)
 		{
 			ladybrown.move(LB_SPEED);
-			std::cout << lbrs.get_angle();
-			std::cout << lbrs.get_position();
 		}
-		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_A))
-			ladybrown.move(-LB_SPEED);
+		else if (lbrs.get_position() <= 24266)
+			sendBack = true;
 		else
 			ladybrown.move(0);
+
+		if (sendBack)
+		{
+			ladybrown.move(-LB_SPEED);
+			if (lbrs.get_position() > 31930)
+			{
+				ladybrown.move(0);
+				sendBack = false;
+			}
+		}
 	}
 }
