@@ -102,6 +102,43 @@ lemlib::ExpoDriveCurve steerCurve(3, // joystick deadband out of 127
 );
 
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors, &throttleCurve, &steerCurve);
+
+
+//MOTORS
+pros::Motor intake (-12);
+pros::Motor ladybrown(1);
+
+//PNEU
+bool state1 = LOW;
+pros::adi::DigitalOut mogomech0 ('H', state1);
+pros::adi::DigitalOut mogomech1 ('G', state1);
+
+//SENSORS
+pros::Rotation lbrs (11); //lady brown rotation sensor (lbrs)
+
+//LADY BROWN
+const int numStates = 3;
+int states[numStates] = {0, 30, 200}; //PLACEHOLDERS (TUNE)
+int curState = 0;
+int target = 0;
+
+void nextState()
+{
+	curState++;
+	if (curState == numStates)
+		curState = 0;
+	target = states[curState];
+}
+
+void liftControl()
+{
+	double kp = 0.5; //TUNE (smaller = less reactive)
+	double error = target - lbrs.get_position();
+	double velocity = kp * error;
+	ladybrown.move(velocity);
+}
+
+
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -113,6 +150,14 @@ void initialize()
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
 	pros::lcd::register_btn1_cb(on_center_button);
+	
+	pros::Task liftControlTask([]{
+		while (true)
+		{
+			liftControl();
+			pros::delay(10);
+		}
+	});
 }
 
 /**
@@ -175,25 +220,12 @@ void opcontrol() {
 	pros::MotorGroup left_mg({-4, -2, 20});    // Creates a motor group with forwards ports 1 & 3 and reversed port 2
 	pros::MotorGroup right_mg({10, -3, 9});  // Creates a motor group with forwards port 5 and reversed ports 4 & 6
 
-	//MOTORS
-	pros::Motor intake (-12);
-	pros::Motor ladybrown(1);
-
-	//SENSORS
-	pros::Rotation lbrs (11); //lady brown rotation sensor (lbrs)
-	lbrs.reset();
-
-	//PNEU
-	bool state1 = LOW;
-	pros::adi::DigitalOut mogomech0 ('H', state1);
-	pros::adi::DigitalOut mogomech1 ('G', state1);
-
 	//STARTING STATES
 	bool mgm = false;
 	const int INTAKE_SPEED = 103;
 	const int LB_SPEED = 85;
-
 	bool sendBack = false;
+	lbrs.reset_position();
 
 	while (true) {
 		//Prints status of the emulated screen LCDs
@@ -203,7 +235,6 @@ void opcontrol() {
 			(pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 			(pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0
 		);
-
 		//Prints lady brown rotation sensor position
 		pros::screen::print(
 			pros::E_TEXT_LARGE_CENTER,
@@ -240,6 +271,16 @@ void opcontrol() {
 			mogomech1.set_value(false);
 		}
 
+		//LADY BROWN
+		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X))
+			nextState();
+	}
+}
+
+
+		//IGNORE (tism)
+
+		/*
 		//LADY DIDDY
 		//STAGE 1: 31913
 		//22460
@@ -248,16 +289,13 @@ void opcontrol() {
 		{
 			ladybrown.move(70);
 		}
-		/*
 		else if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X))
 		{
 			ladybrown.move(70);
 		}
-		*/
 		else
 			ladybrown.move(10);
 
-		/*
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X) && lbrs.get_position() > 22460)
 		{
 			ladybrown.move(LB_SPEED);
@@ -277,5 +315,3 @@ void opcontrol() {
 			}
 		}
 		*/
-	}
-}
