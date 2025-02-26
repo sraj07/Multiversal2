@@ -213,8 +213,8 @@ void opcontrol() {
 		//Arcade control scheme
 		int dir = master.get_analog(ANALOG_LEFT_Y);    // Gets amount forward/backward from left joystick
 		int turn = master.get_analog(ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
-		left_mg.move(dir - turn);                      // Sets left motor voltage
-		right_mg.move(dir + turn);                     // Sets right motor voltage
+		left_mg.move(dir + turn);                      // Sets left motor voltage
+		right_mg.move(dir - turn);                     // Sets right motor voltage
 		pros::delay(20);                          // Run for 20 ms then update
 
 		//Intake
@@ -234,13 +234,28 @@ void opcontrol() {
 			mogomech.set_value(false);
 
 		//LADY DIDDY
+		//STAGE 1: 31913
 		//22460
 
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X) && lbrs.get_position() > 31930)
+		{
+			ladybrown.move(70);
+		}
+		/*
+		else if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X))
+		{
+			ladybrown.move(70);
+		}
+		*/
+		else
+			ladybrown.move(10);
+
+		/*
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X) && lbrs.get_position() > 22460)
 		{
 			ladybrown.move(LB_SPEED);
 		}
-		else if (lbrs.get_position() <= 24266)
+		else if (lbrs.get_position() <= 22460)
 			sendBack = true;
 		else
 			ladybrown.move(0);
@@ -254,5 +269,6 @@ void opcontrol() {
 				sendBack = false;
 			}
 		}
+		*/
 	}
 }
