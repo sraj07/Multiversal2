@@ -165,10 +165,7 @@ void initialize()
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
  */
-void disabled()
-{
-
-}
+void disabled() {}
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field
@@ -179,10 +176,7 @@ void disabled()
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
-void competition_initialize()
-{
-
-}
+void competition_initialize() {}
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -223,8 +217,6 @@ void opcontrol() {
 	//STARTING STATES
 	bool mgm = false;
 	const int INTAKE_SPEED = 103;
-	const int LB_SPEED = 85;
-	bool sendBack = false;
 	lbrs.reset_position();
 
 	while (true) {
@@ -284,6 +276,9 @@ void opcontrol() {
 		//LADY DIDDY
 		//STAGE 1: 31913
 		//22460
+		
+		const int LB_SPEED = 85;
+		bool sendBack = false;
 
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X) && lbrs.get_position() > 31930)
 		{
