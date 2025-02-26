@@ -185,7 +185,8 @@ void opcontrol() {
 
 	//PNEU
 	bool state1 = LOW;
-	pros::adi::DigitalOut mogomech ('H', state1);
+	pros::adi::DigitalOut mogomech0 ('H', state1);
+	pros::adi::DigitalOut mogomech1 ('G', state1);
 
 	//STARTING STATES
 	bool mgm = false;
@@ -229,9 +230,15 @@ void opcontrol() {
 		if (master.get_digital_new_press(DIGITAL_UP))
 			mgm = ! mgm;
 		if(mgm)
-			mogomech.set_value(true);
+		{
+			mogomech0.set_value(true);
+			mogomech1.set_value(true);
+		}
 		else
-			mogomech.set_value(false);
+		{
+			mogomech0.set_value(false);
+			mogomech1.set_value(false);
+		}
 
 		//LADY DIDDY
 		//STAGE 1: 31913
