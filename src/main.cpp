@@ -45,11 +45,12 @@ pros::Imu imu(15);                                 // imu port
 pros::Rotation horizontalEnc(19);
 // vertical tracking wheel encoder. Rotation sensor, port 11, reversed
 pros::Rotation verticalEnc0(6);
+pros::Rotation verticalEnc1(7);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::OLD_325, 0.5);
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
 lemlib::TrackingWheel vertical0(&verticalEnc0, lemlib::Omniwheel::OLD_325, 3);
-lemlib::TrackingWheel vertical1(&verticalEnc0, lemlib::Omniwheel::OLD_325, 3);
+lemlib::TrackingWheel vertical1(&verticalEnc1, lemlib::Omniwheel::OLD_325, 3);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&left_motors, // left motor group
@@ -216,18 +217,16 @@ void initialize()
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
 	pros::lcd::register_btn1_cb(on_center_button);
-	autonomous();
+	//autonomous(); //comment out for driver skills
 	chassis.calibrate();
 	
-	/*
-	pros::Task liftControlTask([]{
-		while (true)
-		{
-			liftControl();
-			pros::delay(10);
-		}
-	});
-
+	// pros::Task liftControlTask([]{
+	// 	while (true)
+	// 	{
+	// 		liftControl();
+	// 		pros::delay(10);
+	// 	}
+	// });
 }
 
 /**
@@ -265,6 +264,7 @@ void autonomous()
 {
 	chassis.setPose(0, 0, 0, 5000);
 	chassis.turnToHeading(90, 100000);
+	chassis.follow(path_jerryio_txt, 15, 60000);
 }
 
 /**
