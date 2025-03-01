@@ -1,3 +1,5 @@
+//REAL CODE
+
 #include "main.h"
 //#include "lemlib/api.hpp" //IWYU pragma: keep
 #include "lemlib/chassis/chassis.hpp"
@@ -41,10 +43,12 @@ pros::Imu imu(15);                                 // imu port
 pros::Rotation horizontalEnc(19);
 // vertical tracking wheel encoder. Rotation sensor, port 11, reversed
 pros::Rotation verticalEnc0(6);
+pros::Rotation verticalEnc1(7);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::OLD_325, 0.5);
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
 lemlib::TrackingWheel vertical0(&verticalEnc0, lemlib::Omniwheel::OLD_325, 3);
+lemlib::TrackingWheel vertical1(&verticalEnc1, lemlib::Omniwheel::OLD_325, 3);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&left_motors, // left motor group
@@ -56,7 +60,7 @@ lemlib::Drivetrain drivetrain(&left_motors, // left motor group
 							);
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(0.3, // proportional gain (kP)
+lemlib::ControllerSettings linearController(0.03, // proportional gain (kP)
                                             0, // integral gain (kI)
                                             5, // derivative gain (kD)
                                             0, // anti windup
@@ -80,7 +84,7 @@ lemlib::ControllerSettings angularController(0.3, // proportional gain (kP)
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(&vertical0, nullptr, // vertical tracking wheel // vertical tracking wheel 2
+lemlib::OdomSensors sensors(&vertical0, &vertical1, // vertical tracking wheel // vertical tracking wheel 2
 	&horizontal, // horizontal tracking wheel
 	nullptr, // horizontal tracking wheel 2 (DNE)
 	&imu // inertial sensor
@@ -103,7 +107,7 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
 
 //MOTORS
 pros::Motor intake (-12);
-pros::Motor ladybrown(1);
+pros::Motor ladybrown(-1);
 
 //PNEU
 bool state1 = LOW;
@@ -111,17 +115,17 @@ pros::adi::DigitalOut mogomech0 ('H', state1);
 pros::adi::DigitalOut mogomech1 ('G', state1);
 
 //SENSORS
-pros::Rotation lbrs (11); //lady brown rotation sensor (lbrs)
+pros::Rotation lbrs (-11); //lady brown rotation sensor (lbrs)
 
 //LADY BROWN
 const int numStates = 3;
-int states[numStates] = {0, 30, 200}; //PLACEHOLDERS (TUNE)
+int states[numStates] = {0, 300, 900};
 int curState = 0;
 int target = 0;
 
 void nextState()
 {
-	curState++;
+	curState += 1;
 	if (curState == numStates)
 		curState = 0;
 	target = states[curState];
@@ -129,7 +133,13 @@ void nextState()
 
 void liftControl()
 {
-	double kp = 0.5; //TUNE (smaller = less reactive)
+	pros::screen::print(
+		pros::E_TEXT_LARGE_CENTER,
+		1,
+		std::to_string(lbrs.get_position()).c_str()
+	);
+
+	double kp = 0.2; //TUNE (smaller = less reactive)
 	double error = target - lbrs.get_position();
 	double velocity = kp * error;
 	ladybrown.move(velocity);
@@ -153,7 +163,7 @@ void initialize()
 	pros::Task liftControlTask([]{
 		while (true)
 		{
-			//liftControl();
+			liftControl();
 			pros::delay(10);
 		}
 	});
@@ -209,7 +219,7 @@ void autonomous()
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	autonomous();
+	//autonomous();
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 
 	//DRIVETRAIN
@@ -266,8 +276,15 @@ void opcontrol() {
 		}
 
 		//LADY BROWN
-		if (master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_X))
+		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X))
 			nextState();
+		/*
+			ladybrown.move(-85);
+		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_Y))
+			ladybrown.move(85);
+		else
+			ladybrown.move(0);
+		*/
 	}
 }
 
