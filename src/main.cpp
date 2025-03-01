@@ -32,21 +32,19 @@ void on_center_button() {
 //LADY BROWN = 1
 //LADY BROWN ROT. SENSOR = 11
 //MOGO MECH = H
-pros::MotorGroup left_motors({-5, -2, 20});  // left motor ports (stacked 20)
-pros::MotorGroup right_motors({-10, -3, 9}); // right motor ports (stacked 3)
-pros::Imu imu(10);                                // imu port
+pros::MotorGroup left_motors({-4, -2, 20}); // left motor ports (stacked 20)
+pros::MotorGroup right_motors({10, -3, 9}); // right motor ports (stacked 3)
+pros::Imu imu(15);                                 // imu port
 
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
 pros::Rotation horizontalEnc(19);
 // vertical tracking wheel encoder. Rotation sensor, port 11, reversed
 pros::Rotation verticalEnc0(6);
-pros::Rotation verticalEnc1(7);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::OLD_325, 0.5);
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
 lemlib::TrackingWheel vertical0(&verticalEnc0, lemlib::Omniwheel::OLD_325, 3);
-lemlib::TrackingWheel vertical1(&verticalEnc0, lemlib::Omniwheel::OLD_325, 3);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&left_motors, // left motor group
@@ -58,9 +56,9 @@ lemlib::Drivetrain drivetrain(&left_motors, // left motor group
 							);
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(2, // proportional gain (kP)
+lemlib::ControllerSettings linearController(0.3, // proportional gain (kP)
                                             0, // integral gain (kI)
-                                            3, // derivative gain (kD)
+                                            5, // derivative gain (kD)
                                             0, // anti windup
                                             0, // small error range, in inches
                                             0, // small error range timeout, in milliseconds
@@ -70,9 +68,9 @@ lemlib::ControllerSettings linearController(2, // proportional gain (kP)
 );
 
 // angular motion controller
-lemlib::ControllerSettings angularController(2, // proportional gain (kP)
+lemlib::ControllerSettings angularController(0.3, // proportional gain (kP)
                                              0, // integral gain (kI)
-                                             10, // derivative gain (kD)
+                                             5, // derivative gain (kD)
                                              0, // anti windup
                                              0, // small error range, in degrees
                                              0, // small error range timeout, in milliseconds
@@ -82,8 +80,7 @@ lemlib::ControllerSettings angularController(2, // proportional gain (kP)
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(&vertical0, // vertical tracking wheel
-	&vertical1, // vertical tracking wheel 2
+lemlib::OdomSensors sensors(&vertical0, nullptr, // vertical tracking wheel // vertical tracking wheel 2
 	&horizontal, // horizontal tracking wheel
 	nullptr, // horizontal tracking wheel 2 (DNE)
 	&imu // inertial sensor
@@ -160,7 +157,6 @@ void initialize()
 			pros::delay(10);
 		}
 	});
-
 }
 
 /**
@@ -195,7 +191,8 @@ void competition_initialize() {}
 void autonomous()
 {
 	chassis.setPose(0, 0, 0, 5000);
-	chassis.turnToHeading(90, 100000);
+	//chassis.turnToHeading(90, 100000, {}, false);
+	chassis.moveToPose(10, 0, 0, 1000);
 }
 
 /**
