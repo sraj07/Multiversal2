@@ -45,12 +45,11 @@ pros::Imu imu(15);                                 // imu port
 pros::Rotation horizontalEnc(19);
 // vertical tracking wheel encoder. Rotation sensor, port 11, reversed
 pros::Rotation verticalEnc0(6);
-pros::Rotation verticalEnc1(7);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
 lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::OLD_325, 0.5);
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
 lemlib::TrackingWheel vertical0(&verticalEnc0, lemlib::Omniwheel::OLD_325, 3);
-lemlib::TrackingWheel vertical1(&verticalEnc1, lemlib::Omniwheel::OLD_325, 3);
+lemlib::TrackingWheel vertical1(&verticalEnc0, lemlib::Omniwheel::OLD_325, 3);
 
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&left_motors, // left motor group
@@ -62,7 +61,7 @@ lemlib::Drivetrain drivetrain(&left_motors, // left motor group
 							);
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(0.03, // proportional gain (kP)
+lemlib::ControllerSettings linearController(2, // proportional gain (kP)
                                             0, // integral gain (kI)
                                             5, // derivative gain (kD)
                                             0, // anti windup
@@ -86,7 +85,8 @@ lemlib::ControllerSettings angularController(0.3, // proportional gain (kP)
 );
 
 // sensors for odometry
-lemlib::OdomSensors sensors(&vertical0, &vertical1, // vertical tracking wheel // vertical tracking wheel 2
+lemlib::OdomSensors sensors(&vertical0, // vertical tracking wheel
+	&vertical1, // vertical tracking wheel 2
 	&horizontal, // horizontal tracking wheel
 	nullptr, // horizontal tracking wheel 2 (DNE)
 	&imu // inertial sensor
@@ -227,7 +227,7 @@ void initialize()
 			pros::delay(10);
 		}
 	});
-	*/
+
 }
 
 /**
@@ -263,10 +263,8 @@ void competition_initialize() {}
 ASSET(path_jerryio_txt);
 void autonomous()
 {
-	chassis.setPose(0, 0, 0);
-	printEncs();
-	chassis.follow(path_jerryio_txt, 15, 2000000000);
-	printEncs();
+	chassis.setPose(0, 0, 0, 5000);
+	chassis.turnToHeading(90, 100000);
 }
 
 /**
