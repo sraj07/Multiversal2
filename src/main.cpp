@@ -160,6 +160,7 @@ void initialize()
 
 	chassis.calibrate();
 	
+	/*
 	pros::Task liftControlTask([]{
 		while (true)
 		{
@@ -167,6 +168,7 @@ void initialize()
 			pros::delay(10);
 		}
 	});
+	*/
 }
 
 /**
@@ -277,14 +279,12 @@ void opcontrol() {
 
 		//LADY BROWN
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X))
-			nextState();
-		/*
+			//nextState();
 			ladybrown.move(-85);
 		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_Y))
 			ladybrown.move(85);
 		else
 			ladybrown.move(0);
-		*/
 	}
 }
 
