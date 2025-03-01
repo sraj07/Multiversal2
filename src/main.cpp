@@ -14,6 +14,8 @@
 #include <iostream>
 #include <string>
 
+//lemlib::Pose position = (0, 0, 0);
+
 /**
  * A callback function for LLEMU's center button.
  *
@@ -80,7 +82,7 @@ lemlib::ControllerSettings angularController(0.3, // proportional gain (kP)
                                              0, // small error range timeout, in milliseconds
                                              0, // large error range, in degrees
                                              0, // large error range timeout, in milliseconds
-                                             0 // maximum acceleration (slew)
+                                             0  // maximum acceleration (slew)
 );
 
 // sensors for odometry
@@ -145,6 +147,63 @@ void liftControl()
 	ladybrown.move(velocity);
 }
 
+void printEncs()
+{
+	pros::screen::print(
+		pros::E_TEXT_LARGE_CENTER,
+		1,
+		std::to_string(verticalEnc0.get_position()).c_str()
+	);
+	pros::screen::print(
+		pros::E_TEXT_LARGE_CENTER,
+		3,
+		std::to_string(verticalEnc1.get_position()).c_str()
+	);
+	pros::screen::print(
+		pros::E_TEXT_LARGE_CENTER,
+		5,
+		std::to_string(horizontalEnc.get_position()).c_str()
+	);
+}
+
+// void baseOdometry()
+// {
+// 	double prevEncdL = 0;
+// 	double prevEncdR = 0;
+// 	double prevEncdLat = 0;
+// 	double prevAngle = 0;
+
+// 	int count = 0;
+// 	while(!COMPETITION_MODE || competition::is_autonomouse())
+// 	{
+// 		encdL = verticalEnc0.getPosition();
+// 		encdR = verticalEnc1.getPosition();
+// 		double encdChangeL = (encdL - prevEncdL);
+// 		double encdChangeR = (encdR - prevEncdR);
+// 		double sumEncdChange = encdChangeL + encdChangeR;
+// 		double deltaAngle = (encdChangeL - encdChangeR)/baseWidth;
+// 		double halfDeltaAngle = deltaAngle/2;
+// 		position.angle += deltaAngle;
+// 		if(deltaAngle == 0)
+// 		{
+// 			position.x += sumEncdChange/2 * sin(position.angle);
+// 			position.y += sunEndChange/2 * cos(position.angle);
+// 		}
+// 	}
+// }
+
+// #if USING_LATERAL_ENCD
+// 	double encdLat = (double) horizontalEnc.get_position() * inPerDegLat;
+// 	double encdChangeLat = encdLat - prevEncdLat;
+// 	double latShift = encdChangeLat;
+// 	if (deltaAngle) latShift = (encdChangeLat/deltaAngle) * sin(halfDeltaAngle)*2.0;
+
+// 	double xShift = latShift * cos(prevAngle + halfDeltaAngle);
+// 	double yShift = latShift * -sin(prevAngle + halfDeltaAngle);
+// 	position.x += xShift;
+// 	position.y += yShift;
+// #endif
+
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -157,7 +216,7 @@ void initialize()
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
 	pros::lcd::register_btn1_cb(on_center_button);
-
+	autonomous();
 	chassis.calibrate();
 	
 	/*
@@ -200,11 +259,14 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
+
+ASSET(path_jerryio_txt);
 void autonomous()
 {
-	chassis.setPose(0, 0, 0, 5000);
-	//chassis.turnToHeading(90, 100000, {}, false);
-	chassis.moveToPose(10, 0, 0, 1000);
+	chassis.setPose(0, 0, 0);
+	printEncs();
+	chassis.follow(path_jerryio_txt, 15, 2000000000);
+	printEncs();
 }
 
 /**
@@ -230,7 +292,7 @@ void opcontrol() {
 
 	//STARTING STATES
 	bool mgm = false;
-	const int INTAKE_SPEED = 103;
+	const int INTAKE_SPEED = 122;
 	lbrs.reset_position();
 
 	while (true) {
@@ -259,7 +321,7 @@ void opcontrol() {
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R1))
 			intake.move(INTAKE_SPEED);
 		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
-			intake.move(-INTAKE_SPEED/2);
+			intake.move(-INTAKE_SPEED);
 		else
 			intake.move(0);
 
