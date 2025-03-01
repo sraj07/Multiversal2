@@ -31,11 +31,7 @@ void on_center_button() {
 		pros::lcd::clear_line(2);
 	}
 }
-//INTAKE = 12
-//COLOR SENSOR = 13
-//LADY BROWN = 1
-//LADY BROWN ROT. SENSOR = 11
-//MOGO MECH = H
+
 pros::MotorGroup left_motors({-4, -2, 20}); // left motor ports (stacked 20)
 pros::MotorGroup right_motors({10, -3, 9}); // right motor ports (stacked 3)
 pros::Imu imu(15);                                 // imu port
@@ -45,10 +41,10 @@ pros::Imu imu(15);                                 // imu port
 pros::Rotation horizontalEnc(19);
 // vertical tracking wheel encoder. Rotation sensor, port 11, reversed
 pros::Rotation verticalEnc0(6);
-pros::Rotation verticalEnc1(7);
+pros::Rotation verticalEnc1(-7);
 // horizontal tracking wheel. 2.75" diameter, 5.75" offset, back of the robot (negative)
-lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::OLD_325, 0.5);
 // vertical tracking wheel. 2.75" diameter, 2.5" offset, left of the robot (negative)
+lemlib::TrackingWheel horizontal(&horizontalEnc, lemlib::Omniwheel::OLD_325, 0.5);
 lemlib::TrackingWheel vertical0(&verticalEnc0, lemlib::Omniwheel::OLD_325, 3);
 lemlib::TrackingWheel vertical1(&verticalEnc1, lemlib::Omniwheel::OLD_325, 3);
 
@@ -111,11 +107,14 @@ lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors
 //MOTORS
 pros::Motor intake (-12);
 pros::Motor ladybrown(-1);
+const int INTAKE_SPEED = 122;
+const int LADYBROWN_SPEED = 85;
 
-//PNEU
+//MOGO MECH
 bool state1 = LOW;
 pros::adi::DigitalOut mogomech0 ('H', state1);
 pros::adi::DigitalOut mogomech1 ('G', state1);
+bool mgm = false;
 
 //SENSORS
 pros::Rotation lbrs (-11); //lady brown rotation sensor (lbrs)
@@ -125,6 +124,7 @@ const int numStates = 3;
 int states[numStates] = {0, 300, 900};
 int curState = 0;
 int target = 0;
+
 
 void nextState()
 {
@@ -281,16 +281,9 @@ void autonomous()
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	//autonomous();
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-	//DRIVETRAIN
-	pros::MotorGroup left_mg({-4, -2, 20});    // Creates a motor group with forwards ports 1 & 3 and reversed port 2
-	pros::MotorGroup right_mg({10, -3, 9});  // Creates a motor group with forwards port 5 and reversed ports 4 & 6
-
 	//STARTING STATES
-	bool mgm = false;
-	const int INTAKE_SPEED = 122;
 	lbrs.reset_position();
 
 	while (true) {
@@ -311,8 +304,8 @@ void opcontrol() {
 		//Arcade control scheme
 		int dir = master.get_analog(ANALOG_LEFT_Y);    // Gets amount forward/backward from left joystick
 		int turn = master.get_analog(ANALOG_RIGHT_X);  // Gets the turn left/right from right joystick
-		left_mg.move(dir + turn);                      // Sets left motor voltage
-		right_mg.move(dir - turn);                     // Sets right motor voltage
+		left_motors.move(dir + turn);                  // Sets left motor voltage
+		right_motors.move(dir - turn);                 // Sets right motor voltage
 		pros::delay(20);                          // Run for 20 ms then update
 
 		//Intake
@@ -325,7 +318,7 @@ void opcontrol() {
 
 		//MGM
 		if (master.get_digital_new_press(DIGITAL_UP))
-			mgm = ! mgm;
+			mgm = !mgm;
 		if(mgm)
 		{
 			mogomech0.set_value(true);
@@ -340,9 +333,9 @@ void opcontrol() {
 		//LADY BROWN
 		if (master.get_digital(pros::E_CONTROLLER_DIGITAL_X))
 			//nextState();
-			ladybrown.move(-85);
+			ladybrown.move(-LADYBROWN_SPEED);
 		else if (master.get_digital(pros::E_CONTROLLER_DIGITAL_Y))
-			ladybrown.move(85);
+			ladybrown.move(LADYBROWN_SPEED);
 		else
 			ladybrown.move(0);
 	}
