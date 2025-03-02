@@ -217,7 +217,6 @@ void initialize()
 	pros::lcd::initialize();
 	pros::lcd::set_text(1, "Hello PROS User!");
 	pros::lcd::register_btn1_cb(on_center_button);
-	//autonomous(); //comment out for driver skills
 	chassis.calibrate();
 	
 	// pros::Task liftControlTask([]{
@@ -262,9 +261,18 @@ void competition_initialize() {}
 ASSET(path_jerryio_txt);
 void autonomous()
 {
-	chassis.setPose(0, 0, 0, 5000);
-	chassis.turnToHeading(90, 100000);
-	chassis.follow(path_jerryio_txt, 15, 60000);
+	chassis.setPose(-62.7, 0.8, 50, 5000);
+	chassis.moveToPose(-41, 13, 345, 1000);
+	chassis.moveToPose(-66.5, 65.5, 345, 1000);
+	chassis.moveToPose(-38.6, -12.4, 215, 1000);
+	chassis.moveToPose(-65.8, -66.5, 30, 1000);
+	chassis.moveToPose(-4.9, -5.5, 120, 1000);
+	chassis.moveToPose(29.4, -20.4, 70, 1000);
+	chassis.moveToPose(53.5, -11.2, 170, 1000);
+	chassis.moveToPose(64.3, -67.6, 0, 1000);
+	chassis.moveToPose(57.2, 18.6, 0, 1000);
+	chassis.moveToPose(64.3, 65.3, 0, 1000);
+	//chassis.follow(path_jerryio_txt, 15, 60000);
 }
 
 /**
